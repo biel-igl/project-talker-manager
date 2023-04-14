@@ -1,4 +1,6 @@
 const express = require('express');
+const validateEmail = require('./middlewares/validateEmail');
+const validatePassword = require('./middlewares/validatePassword');
 const { readJson } = require('./handleJson');
 const generateToken = require('./utils/generateToken');
 
@@ -26,9 +28,9 @@ app.get('/talker/:id', async (req, res) => {
   return res.status(200).json(talkeById); 
 });
 
-app.post('/login', async (_req, res) => {
+app.post('/login', validateEmail, validatePassword, async (_req, res) => {
   const token = generateToken();
-  return res.status(200).json({ token }); 
+  return res.status(200).json({ token });
 });
 
 app.listen(PORT, () => {
