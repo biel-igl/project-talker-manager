@@ -7,4 +7,9 @@ const readJson = async (nameFile) => {
     return JSON.parse(fileRead);
 };
 
-module.exports = { readJson };
+const writeJson = async (nameFile, content) => {
+    const filePath = path.resolve(__dirname, nameFile);
+    const contents = JSON.stringify(content);
+    return fs.writeFile(filePath, contents);
+};
+module.exports = { readJson, writeJson };

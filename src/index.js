@@ -1,8 +1,12 @@
 const express = require('express');
 const validateEmail = require('./middlewares/validateEmail');
 const validatePassword = require('./middlewares/validatePassword');
-const { readJson } = require('./handleJson');
+const { readJson, writeJson } = require('./handleJson');
 const generateToken = require('./utils/generateToken');
+const validateAuthorization = require('./middlewares/validateAuthorization');
+const validateName = require('./middlewares/validateName');
+const validateAge = require('./middlewares/validateAge');
+const validateTalker = require('./middlewares/validateTalker');
 
 const app = express();
 app.use(express.json());
@@ -31,6 +35,14 @@ app.get('/talker/:id', async (req, res) => {
 app.post('/login', validateEmail, validatePassword, async (_req, res) => {
   const token = generateToken();
   return res.status(200).json({ token });
+});
+
+app.post('/talker',
+  validateAuthorization, validateName, validateAge, validateTalker, async (req, res) => {
+  const talker = await readJson('talker.json');
+  const id = talker.length + 1;
+  await writeJson('talker.json', [...talker, { ...req.body, id }]);
+  return res.status(201).json({ ...req.body, id });
 });
 
 app.listen(PORT, () => {
