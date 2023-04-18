@@ -8,6 +8,8 @@ const validateName = require('./middlewares/validateName');
 const validateAge = require('./middlewares/validateAge');
 const validateTalker = require('./middlewares/validateTalker');
 
+const docPath = 'talker.json';
+
 const app = express();
 app.use(express.json());
 
@@ -20,13 +22,13 @@ app.get('/', (_request, response) => {
 });
 
 app.get('/talker', async (_req, res) => {
-  const talker = await readJson('talker.json');
+  const talker = await readJson(docPath);
   return res.status(200).json(talker); 
 });
 
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
-  const talker = await readJson('talker.json');
+  const talker = await readJson(docPath);
   const talkeById = talker.find((one) => one.id === Number(id));
   if (!talkeById) res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   return res.status(200).json(talkeById); 
@@ -39,10 +41,26 @@ app.post('/login', validateEmail, validatePassword, async (_req, res) => {
 
 app.post('/talker',
   validateAuthorization, validateName, validateAge, validateTalker, async (req, res) => {
-  const talker = await readJson('talker.json');
+  const talker = await readJson(docPath);
   const id = talker.length + 1;
-  await writeJson('talker.json', [...talker, { ...req.body, id }]);
+  await writeJson(docPath, [...talker, { ...req.body, id }]);
   return res.status(201).json({ ...req.body, id });
+});
+
+app.put('/talker/:id',
+validateAuthorization,
+validateName,
+validateAge,
+validateTalker,
+async (req, res) => {
+  const { id } = req.params;
+  const talker = await readJson(docPath);
+  const talkeById = talker.find((one) => one.id === Number(id));
+  if (!talkeById) { return res.status(404).json({ message: 'Pessoa palestrante não encontrada' }); }
+  const idNumber = parseInt(id, 32);
+  talker[id - 1] = { id: idNumber, ...req.body };
+  await writeJson(docPath, [...talker]);
+  return res.status(200).json(talker[id - 1]);
 });
 
 app.listen(PORT, () => {
