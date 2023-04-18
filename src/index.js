@@ -9,6 +9,8 @@ const validateAge = require('./middlewares/validateAge');
 const validateTalker = require('./middlewares/validateTalker');
 const validateRateToQuery = require('./middlewares/validateRateToQuery');
 const validateDateToQuery = require('./middlewares/validatedateToQuery');
+const validateRate = require('./middlewares/validateRate');
+const validateRatePatch = require('./middlewares/validateRatePatch');
 
 const docPath = 'talker.json';
 
@@ -26,6 +28,17 @@ app.get('/', (_request, response) => {
 app.get('/talker', async (_req, res) => {
   const talker = await readJson(docPath);
   return res.status(200).json(talker); 
+});
+
+app.patch('/talker/rate/:id', validateAuthorization, validateRatePatch, async (req, res) => {
+  const { rate } = req.body;
+  const { id } = req.params;
+  const talker = await readJson(docPath);
+  const talkeById = talker.find((one) => one.id === Number(id));
+  if (!talkeById) { return res.status(404).json({ message: 'Pessoa palestrante não encontrada' }); }
+  talkeById.talk.rate = rate;
+  await writeJson(docPath, [...talker, talkeById]);
+  return res.status(204).json(talker[id - 1]);
 });
 
 app.get('/talker/search',
@@ -56,7 +69,12 @@ app.post('/login', validateEmail, validatePassword, async (_req, res) => {
 });
 
 app.post('/talker',
-  validateAuthorization, validateName, validateAge, validateTalker, async (req, res) => {
+  validateAuthorization,
+  validateName,
+  validateAge,
+  validateTalker,
+  validateRate,
+  async (req, res) => {
   const talker = await readJson(docPath);
   const id = talker.length + 1;
   await writeJson(docPath, [...talker, { ...req.body, id }]);
@@ -77,6 +95,7 @@ validateAuthorization,
 validateName,
 validateAge,
 validateTalker,
+validateRate,
 async (req, res) => {
   const { id } = req.params;
   const talker = await readJson(docPath);

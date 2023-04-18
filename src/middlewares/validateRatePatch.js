@@ -3,7 +3,7 @@ const rateTrue = (number) => (
 );
 
 module.exports = (req, res, next) => {
-    const { talk: { rate } } = req.body;
+    const { rate } = req.body;
     if (rate === undefined) {
         return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
     }
