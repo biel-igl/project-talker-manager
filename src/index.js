@@ -8,6 +8,7 @@ const validateName = require('./middlewares/validateName');
 const validateAge = require('./middlewares/validateAge');
 const validateTalker = require('./middlewares/validateTalker');
 const validateRateToQuery = require('./middlewares/validateRateToQuery');
+const validateDateToQuery = require('./middlewares/validatedateToQuery');
 
 const docPath = 'talker.json';
 
@@ -27,14 +28,18 @@ app.get('/talker', async (_req, res) => {
   return res.status(200).json(talker); 
 });
 
-app.get('/talker/search', validateAuthorization, validateRateToQuery, async (req, res) => {
-  const { q, rate, date } = req.query;
-  const talker = await readJson(docPath);
-  let filter = talker;
-  if (q) filter = talker.filter((one) => one.name.includes(q));
-  if (rate) filter = filter.filter((one) => one.talk.rate === Number(rate));
-  if (date) filter = filter.filter((one) => one.talk.watchedAt === date);
-  return res.status(200).json(filter); 
+app.get('/talker/search',
+  validateAuthorization,
+  validateRateToQuery,
+  validateDateToQuery,
+  async (req, res) => {
+    const { q, rate, date } = req.query;
+    const talker = await readJson(docPath);
+    let filter = talker;
+    if (q) filter = talker.filter((one) => one.name.includes(q));
+    if (rate) filter = filter.filter((one) => one.talk.rate === Number(rate));
+    if (date) filter = filter.filter((one) => one.talk.watchedAt === date);
+    return res.status(200).json(filter); 
 });
 
 app.get('/talker/:id', async (req, res) => {
