@@ -26,6 +26,14 @@ app.get('/talker', async (_req, res) => {
   return res.status(200).json(talker); 
 });
 
+app.get('/talker/search', validateAuthorization, async (req, res) => {
+  const { q } = req.query;
+  const talker = await readJson(docPath);
+  const talkeById = talker.filter((one) => one.name.includes(q));
+  if (!talkeById) res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+  return res.status(200).json(talkeById); 
+});
+
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   const talker = await readJson(docPath);
