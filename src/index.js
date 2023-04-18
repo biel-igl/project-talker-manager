@@ -47,6 +47,15 @@ app.post('/talker',
   return res.status(201).json({ ...req.body, id });
 });
 
+app.delete('/talker/:id',
+  validateAuthorization, async (req, res) => {
+    const { id } = req.params;
+    const talker = await readJson(docPath);
+    const talkerById = talker.filter((one) => one.id !== Number(id));
+    await writeJson(docPath, talkerById);
+    return res.sendStatus(204);
+});
+
 app.put('/talker/:id',
 validateAuthorization,
 validateName,
